@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
+import '/providers/user_provider.dart';
 import 'dart:convert';
 import '/home.dart';
 
@@ -39,22 +41,30 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = false;
       });
 
-      if (/*response.statusCode == 200*/ true) {
+      if (response.statusCode == 200) {
         // JWT를 성공적으로 받아왔을 때
         final responseData = json.decode(response.body);
         final jwtToken = responseData['token'];
+        final username = _usernameController.text;
+        final email = responseData['email'];
 
         // JWT를 안전하게 저장
         await _storage.write(key: 'jwt', value: jwtToken);
+        await _storage.write(key: 'username', value: username);
+        await _storage.write(key: 'email', value: email);
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('로그인 성공')),
         );
+        Provider.of<UserProvider>(context, listen: false)
+            .setUser(username, email, jwtToken);
+            
         // 로그인 후 화면 전환 등 추가 작업
-        Navigator.push(context,
+        Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (BuildContext context) {
           return const HomePage();
         }));
+
       } else {
         // 로그인 실패
         setState(() {
