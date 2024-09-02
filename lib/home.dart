@@ -80,18 +80,19 @@ class _HomePageState extends State<HomePage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: '홈',
+            label: 'AI 도서추천',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '프로필',
+            icon: Icon(Icons.search),
+            label: '도서 검색',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: '설정',
+            icon: Icon(Icons.book),
+            label: '주변 도서관',
           ),
         ],
         currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
     );
