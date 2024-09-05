@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '/providers/user_provider.dart';
+import 'librarypage.dart';
+import 'searchpage.dart';
 import 'start.dart';
-import 'search.dart';
-import 'library.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -30,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
-    final username = userProvider.username;
+    final membername = userProvider.membername;
     final email = userProvider.email;
 
     return Scaffold(
@@ -44,12 +45,12 @@ class _HomePageState extends State<HomePage> {
         padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
-            accountName: Text(username ?? '사용자 이름 없음'),
+            accountName: Text(membername ?? '사용자 이름 없음'),
             accountEmail: Text(email ?? '이메일 없음'),
             currentAccountPicture: CircleAvatar(
               backgroundColor: Colors.white,
               child: Text(
-                username != null ? username[0] : '?',
+                membername != null ? membername[0] : '?',
                 style: const TextStyle(fontSize: 40.0, color: Colors.white),
               ),
             ),
@@ -99,9 +100,15 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
   const HomeContent({super.key});
 
+  @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+//AI추천 기능 구현 필요!!
+class _HomeContentState extends State<HomeContent> {
   @override
   Widget build(BuildContext context) {
     return const Center(

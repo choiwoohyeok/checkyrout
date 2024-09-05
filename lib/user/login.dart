@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:provider/provider.dart';
-import '/providers/user_provider.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+
 import '/home.dart';
+import '/providers/user_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,7 +16,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -29,10 +31,10 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       final response = await http.post(
-        Uri.parse('http://your-spring-boot-server-url/login'),
+        Uri.parse('http://spring-boot-server-url/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'username': _usernameController.text,
+          'email': _emailController.text,
           'password': _passwordController.text,
         }),
       );
@@ -45,26 +47,36 @@ class _LoginPageState extends State<LoginPage> {
         // JWT를 성공적으로 받아왔을 때
         final responseData = json.decode(response.body);
         final jwtToken = responseData['token'];
-        final username = _usernameController.text;
-        final email = responseData['email'];
 
-        // JWT를 안전하게 저장
-        await _storage.write(key: 'jwt', value: jwtToken);
-        await _storage.write(key: 'username', value: username);
-        await _storage.write(key: 'email', value: email);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('로그인 성공')),
+        final response2 = await http.get(
+          Uri.parse('http://spring-boot-server-url/member'),
+          headers: {
+            'Authorization': 'Bearer $jwtToken',
+            'Content-Type': 'application/json'
+          },
         );
-        Provider.of<UserProvider>(context, listen: false)
-            .setUser(username, email, jwtToken);
-            
-        // 로그인 후 화면 전환 등 추가 작업
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (BuildContext context) {
-          return const HomePage();
-        }));
 
+        if (response2.statusCode == 200) {
+          final responseName = json.decode(response2.body);
+          final membername = responseName['membername'];
+          final email = responseName['email'];
+          // JWT를 안전하게 저장
+          await _storage.write(key: 'membername', value: membername);
+          await _storage.write(key: 'email', value: email);
+          await _storage.write(key: 'jwt', value: jwtToken);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('로그인 성공')),
+          );
+          Provider.of<UserProvider>(context, listen: false)
+              .setUser(membername, email, jwtToken);
+
+          // 로그인 후 화면 전환 등 추가 작업
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (BuildContext context) {
+            return const HomePage();
+          }));
+        }
       } else {
         // 로그인 실패
         setState(() {
@@ -90,14 +102,14 @@ class _LoginPageState extends State<LoginPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               TextFormField(
-                controller: _usernameController,
+                controller: _emailController,
                 decoration: const InputDecoration(
-                  labelText: '사용자 이름',
+                  labelText: '이메일',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return '사용자 이름을 입력하세요.';
+                    return '이메일을 입력하세요.';
                   }
                   return null;
                 },
