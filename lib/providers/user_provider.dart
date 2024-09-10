@@ -9,6 +9,7 @@ class UserProvider with ChangeNotifier {
   String? get email => _email;
   String? get token => _token;
 
+  //유저 로그인 정보 저장
   void setUser(String membername, String email, String token) {
     _membername = membername;
     _email = email;
@@ -16,6 +17,7 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // 유저 로그인 정보 삭제
   void clearUser() {
     _membername = null;
     _email = null;
